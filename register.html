@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registration Page</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 0;
+      box-sizing: border-box;
+      background-image:
+        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='90'><text x='15' y='55' font-family='Arial' font-size='14' font-weight='bold' fill='white' fill-opacity='0.6' transform='rotate(-20 85 45)'>GLA University</text></svg>"),
+        linear-gradient(135deg, #ff9a9e, #fad0c4, #a18cd1, #84fab0, #8fd3f4);
+      background-repeat: repeat, no-repeat;
+      background-size: auto, cover;
+      background-attachment: fixed;
+    }
+
+    table {
+      background: white;
+      border: 2px solid #333;
+      border-collapse: collapse;
+      width: 380px;
+      max-width: 94vw;
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #999;
+    }
+
+    th {
+      background: #2c3e50;
+      color: white;
+      font-size: 22px;
+    }
+
+    td.label {
+      width: 38%;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 9px;
+      box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+      padding: 9px 20px;
+      cursor: pointer;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    #message {
+      overflow-wrap: anywhere;
+      margin: 4px;
+    }
+
+    a {
+      color: blue;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="registerForm">
+    <table>
+      <tr>
+        <th colspan="2">Registration</th>
+      </tr>
+
+      <tr>
+        <td class="label">
+          <label for="username">Username</label>
+        </td>
+        <td>
+          <input type="text" id="username" maxlength="30"
+                 placeholder="Create username" required>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label">
+          <label for="email">Email</label>
+        </td>
+        <td>
+          <input type="email" id="email"
+                 placeholder="Enter email" required>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label">
+          <label for="password">Password</label>
+        </td>
+        <td>
+          <input type="password" id="password"
+                 minlength="6" placeholder="Create password" required>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label">
+          <label for="confirmPassword">Confirm Password</label>
+        </td>
+        <td>
+          <input type="password" id="confirmPassword"
+                 minlength="6" placeholder="Re-enter password" required>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" class="center">
+          <input type="submit" id="registerButton"
+                 value="Register">
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" class="center">
+          Already registered?
+          <a href="index.html">Login here</a>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" class="center">
+          <p id="message" role="status" aria-live="polite"></p>
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+    import {
+      getAuth,
+      createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB_UIQf1nKgHDfOrdmJwJ3f4zUnr11MBCk",
+      authDomain: "logpage-b5d48.firebaseapp.com",
+      projectId: "logpage-b5d48",
+      storageBucket: "logpage-b5d48.firebasestorage.app",
+      messagingSenderId: "1036796191778",
+      appId: "1:1036796191778:web:66dbb4aae131310e22167b",
+      measurementId: "G-17VKE891SF"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("registerForm");
+    const message = document.getElementById("message");
+    const button = document.getElementById("registerButton");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const username =
+        document.getElementById("username").value.trim();
+      const email =
+        document.getElementById("email").value.trim();
+      const password =
+        document.getElementById("password").value;
+      const confirmPassword =
+        document.getElementById("confirmPassword").value;
+
+      if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
+        message.textContent =
+          "Username must be 3-30 characters: letters, numbers or _.";
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        message.textContent = "Passwords do not match.";
+        return;
+      }
+
+      button.disabled = true;
+      message.textContent = "Creating your account...";
+
+      let credential;
+
+      try {
+        credential = await createUserWithEmailAndPassword(
+          auth, email, password
+        );
+
+        await setDoc(doc(db, "users", credential.user.uid), {
+          username: username,
+          email: email,
+          createdAt: serverTimestamp()
+        });
+
+        message.textContent =
+          "Registration successful! Redirecting to Login...";
+
+        await auth.signOut?.();
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Registration error:", error.code);
+
+        if (credential?.user) {
+          message.textContent =
+            "Account created, but saving the profile failed. Contact the site administrator before retrying.";
+        } else if (error.code === "auth/email-already-in-use") {
+          message.textContent =
+            "This email is already registered. Please log in.";
+        } else if (error.code === "auth/invalid-email") {
+          message.textContent = "Please enter a valid email.";
+        } else if (error.code === "auth/weak-password") {
+          message.textContent =
+            "Choose a stronger password of at least 6 characters.";
+        } else {
+          message.textContent =
+            "Registration failed. Check Firebase settings and try again.";
+        }
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
