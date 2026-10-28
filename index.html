@@ -3,157 +3,143 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - LogPage</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      background-image:
-        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='90'><text x='15' y='55' font-family='Arial' font-size='14' font-weight='bold' fill='white' fill-opacity='0.6' transform='rotate(-20 85 45)'>GLA University</text></svg>"),
-        linear-gradient(135deg, #ff9a9e, #fad0c4, #a18cd1, #84fab0, #8fd3f4);
-      background-repeat: repeat, no-repeat;
-      background-size: auto, cover;
-      background-attachment: fixed;
-    }
-
-    table {
-      background-color: #fff;
-      border: 2px solid #333;
-      border-collapse: collapse;
-      width: 340px;
-      max-width: 95vw;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-    }
-
-    th, td {
-      padding: 12px;
-      border: 1px solid #999;
-    }
-
-    th {
-      background-color: #2c3e50;
-      color: #fff;
-      font-size: 20px;
-    }
-
-    td.label {
-      width: 35%;
-      font-weight: bold;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      padding: 8px;
+    * {
       box-sizing: border-box;
     }
 
-    input[type="submit"],
-    input[type="reset"] {
-      padding: 8px 18px;
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #dbeafe, #e9d5ff, #fce7f3);
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    h1 {
+      text-align: center;
+      color: #4338ca;
+      margin-top: 0;
+    }
+
+    p {
+      text-align: center;
+      color: #555;
+    }
+
+    label {
+      display: block;
+      margin: 16px 0 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #4f46e5;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
     }
 
-    .center {
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    a {
+      color: #4338ca;
+    }
+
+    .links {
+      margin-top: 18px;
       text-align: center;
+      line-height: 2;
     }
 
     #message {
-      margin: 12px;
-      text-align: center;
+      margin-top: 15px;
       overflow-wrap: anywhere;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
-  <form id="loginForm">
-    <table>
-      <tr>
-        <th colspan="2">Login</th>
-      </tr>
+  <div class="login-box">
+    <h1>LogPage Login</h1>
+    <p>Login to your account</p>
 
-      <tr>
-        <td class="label">
-          <label for="email">Email</label>
-        </td>
-        <td>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter registered email"
-            autocomplete="username"
-            required
-          >
-        </td>
-      </tr>
+    <form id="loginForm">
+      <label for="email">Email / Gmail</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your registered email"
+        autocomplete="email"
+        required
+      >
 
-      <tr>
-        <td class="label">
-          <label for="password">Password</label>
-        </td>
-        <td>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter password"
-            autocomplete="current-password"
-            required
-          >
-        </td>
-      </tr>
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      >
 
-      <tr>
-        <td colspan="2">
-          <input type="checkbox" id="remember" name="remember">
-          <label for="remember">Remember me</label>
-        </td>
-      </tr>
+      <button type="submit" id="loginButton">Login</button>
+    </form>
 
-      <tr>
-        <td colspan="2" class="center">
-          <input type="submit" value="Login" id="loginButton">
-          <input type="reset" value="Reset">
-        </td>
-      </tr>
+    <div class="links">
+      <a href="#" id="forgotPassword">Forgot Password?</a>
+      <br>
+      Don't have an account?
+      <a href="register.html">Register here</a>
+    </div>
 
-      <tr>
-        <td colspan="2" class="center">
-          <a href="#" id="forgotPassword">Forgot password?</a>
-        </td>
-      </tr>
-
-      <tr>
-        <td colspan="2" class="center">
-          <p id="message" role="status" aria-live="polite"></p>
-        </td>
-      </tr>
-    </table>
-  </form>
+    <p id="message" role="status" aria-live="polite"></p>
+  </div>
 
   <script type="module">
     import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
     import {
       getAuth,
       signInWithEmailAndPassword,
       sendPasswordResetEmail,
-      setPersistence,
-      browserLocalPersistence,
-      browserSessionPersistence
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+      sendEmailVerification,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // Your Firebase project configuration
     const firebaseConfig = {
       apiKey: "AIzaSyB_UIQf1nKgHDfOrdmJwJ3f4zUnr11MBCk",
       authDomain: "logpage-b5d48.firebaseapp.com",
@@ -168,49 +154,65 @@
     const auth = getAuth(app);
 
     const loginForm = document.getElementById("loginForm");
-    const message = document.getElementById("message");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
     const loginButton = document.getElementById("loginButton");
+    const message = document.getElementById("message");
     const forgotPassword = document.getElementById("forgotPassword");
 
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const remember = document.getElementById("remember").checked;
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
 
       loginButton.disabled = true;
-      message.textContent = "Logging in...";
+      message.textContent = "Please wait...";
+      message.style.color = "#555";
 
       try {
-        await setPersistence(
+        const result = await signInWithEmailAndPassword(
           auth,
-          remember ? browserLocalPersistence : browserSessionPersistence
+          email,
+          password
         );
 
-        await signInWithEmailAndPassword(auth, email, password);
+        const user = result.user;
 
-        message.textContent = "Login successful!";
+        // Refresh the user's verification status.
+        await user.reload();
 
-        // welcome.html must exist in your GitHub repository.
+        if (!user.emailVerified) {
+          try {
+            await sendEmailVerification(user);
+
+            message.textContent =
+              "Your email is not verified. A verification link has been sent. Check your inbox and spam folder.";
+          } catch (emailError) {
+            message.textContent =
+              "Your email is not verified. Please check your inbox or try again later.";
+          }
+
+          await signOut(auth);
+          return;
+        }
+
+        message.textContent = "Login successful! Opening your page...";
         window.location.href = "welcome.html";
-      } catch (error) {
-        console.error("Login error:", error.code);
 
-        if (
-          error.code === "auth/invalid-credential" ||
-          error.code === "auth/user-not-found" ||
-          error.code === "auth/wrong-password"
-        ) {
+      } catch (error) {
+        console.error(error);
+
+        if (error.code === "auth/invalid-credential" ||
+            error.code === "auth/wrong-password" ||
+            error.code === "auth/user-not-found") {
           message.textContent = "Incorrect email or password.";
-        } else if (error.code === "auth/invalid-email") {
-          message.textContent = "Please enter a valid email address.";
         } else if (error.code === "auth/too-many-requests") {
           message.textContent =
             "Too many attempts. Please try again later.";
         } else {
           message.textContent =
-            "Login failed. Please check your Firebase settings and try again.";
+            "Login failed: " + error.message;
         }
       } finally {
         loginButton.disabled = false;
@@ -220,22 +222,35 @@
     forgotPassword.addEventListener("click", async (event) => {
       event.preventDefault();
 
-      const email = document.getElementById("email").value.trim();
+      const email = emailInput.value.trim();
 
       if (!email) {
         message.textContent =
-          "Please enter your registered email first.";
+          "Please enter your registered email in the Email field first.";
+        emailInput.focus();
         return;
       }
 
+      forgotPassword.style.pointerEvents = "none";
+      message.textContent = "Sending password reset link...";
+
       try {
         await sendPasswordResetEmail(auth, email);
+
         message.textContent =
-          "If the account exists, a password reset email has been sent.";
+          "If an account exists for this email, a password reset link has been sent. Check your inbox and spam folder.";
+
       } catch (error) {
-        console.error("Password reset error:", error.code);
-        message.textContent =
-          "Could not send the reset email. Please check the email and Firebase settings.";
+        console.error(error);
+
+        if (error.code === "auth/invalid-email") {
+          message.textContent = "Please enter a valid email address.";
+        } else {
+          message.textContent =
+            "Could not send the reset email. Please check your email and try again.";
+        }
+      } finally {
+        forgotPassword.style.pointerEvents = "auto";
       }
     });
   </script>
