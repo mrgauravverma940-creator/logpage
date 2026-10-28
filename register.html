@@ -3,164 +3,169 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registration Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - LogPage</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px 0;
+    * {
       box-sizing: border-box;
-      background-image:
-        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='90'><text x='15' y='55' font-family='Arial' font-size='14' font-weight='bold' fill='white' fill-opacity='0.6' transform='rotate(-20 85 45)'>GLA University</text></svg>"),
-        linear-gradient(135deg, #ff9a9e, #fad0c4, #a18cd1, #84fab0, #8fd3f4);
-      background-repeat: repeat, no-repeat;
-      background-size: auto, cover;
-      background-attachment: fixed;
     }
 
-    table {
-      background: white;
-      border: 2px solid #333;
-      border-collapse: collapse;
-      width: 380px;
-      max-width: 94vw;
-      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #dbeafe, #e9d5ff, #fce7f3);
     }
 
-    th, td {
-      padding: 12px;
-      border: 1px solid #999;
+    .register-box {
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     }
 
-    th {
-      background: #2c3e50;
-      color: white;
-      font-size: 22px;
+    h1 {
+      text-align: center;
+      color: #4338ca;
+      margin-top: 0;
     }
 
-    td.label {
-      width: 38%;
+    p {
+      text-align: center;
+      color: #555;
+    }
+
+    label {
+      display: block;
+      margin: 16px 0 6px;
       font-weight: bold;
     }
 
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
+    input {
       width: 100%;
-      padding: 9px;
-      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
     }
 
-    input[type="submit"] {
-      padding: 9px 20px;
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #4f46e5;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
     }
 
-    .center {
-      text-align: center;
-    }
-
-    #message {
-      overflow-wrap: anywhere;
-      margin: 4px;
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
     }
 
     a {
-      color: blue;
+      color: #4338ca;
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 18px;
+      line-height: 2;
+    }
+
+    #message {
+      margin-top: 15px;
+      overflow-wrap: anywhere;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
-  <form id="registerForm">
-    <table>
-      <tr>
-        <th colspan="2">Registration</th>
-      </tr>
+  <div class="register-box">
+    <h1>Create Account</h1>
+    <p>Register for LogPage</p>
 
-      <tr>
-        <td class="label">
-          <label for="username">Username</label>
-        </td>
-        <td>
-          <input type="text" id="username" maxlength="30"
-                 placeholder="Create username" required>
-        </td>
-      </tr>
+    <form id="registerForm">
+      <label for="username">Username</label>
+      <input
+        type="text"
+        id="username"
+        placeholder="Enter your username"
+        autocomplete="username"
+        maxlength="50"
+        required
+      >
 
-      <tr>
-        <td class="label">
-          <label for="email">Email</label>
-        </td>
-        <td>
-          <input type="email" id="email"
-                 placeholder="Enter email" required>
-        </td>
-      </tr>
+      <label for="email">Email / Gmail</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        autocomplete="email"
+        required
+      >
 
-      <tr>
-        <td class="label">
-          <label for="password">Password</label>
-        </td>
-        <td>
-          <input type="password" id="password"
-                 minlength="6" placeholder="Create password" required>
-        </td>
-      </tr>
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="At least 6 characters"
+        autocomplete="new-password"
+        minlength="6"
+        required
+      >
 
-      <tr>
-        <td class="label">
-          <label for="confirmPassword">Confirm Password</label>
-        </td>
-        <td>
-          <input type="password" id="confirmPassword"
-                 minlength="6" placeholder="Re-enter password" required>
-        </td>
-      </tr>
+      <label for="confirmPassword">Confirm Password</label>
+      <input
+        type="password"
+        id="confirmPassword"
+        placeholder="Enter password again"
+        autocomplete="new-password"
+        minlength="6"
+        required
+      >
 
-      <tr>
-        <td colspan="2" class="center">
-          <input type="submit" id="registerButton"
-                 value="Register">
-        </td>
-      </tr>
+      <button type="submit" id="registerButton">
+        Create Account
+      </button>
+    </form>
 
-      <tr>
-        <td colspan="2" class="center">
-          Already registered?
-          <a href="index.html">Login here</a>
-        </td>
-      </tr>
+    <div class="links">
+      Already have an account?
+      <a href="index.html">Login here</a>
+    </div>
 
-      <tr>
-        <td colspan="2" class="center">
-          <p id="message" role="status" aria-live="polite"></p>
-        </td>
-      </tr>
-    </table>
-  </form>
+    <p id="message" role="status" aria-live="polite"></p>
+  </div>
 
   <script type="module">
     import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
     import {
       getAuth,
-      createUserWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+      createUserWithEmailAndPassword,
+      sendEmailVerification,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     import {
       getFirestore,
       doc,
       setDoc,
       serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB_UIQf1nKgHDfOrdmJwJ3f4zUnr11MBCk",
@@ -176,25 +181,25 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const form = document.getElementById("registerForm");
+    const registerForm = document.getElementById("registerForm");
+    const usernameInput = document.getElementById("username");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput =
+      document.getElementById("confirmPassword");
+    const registerButton = document.getElementById("registerButton");
     const message = document.getElementById("message");
-    const button = document.getElementById("registerButton");
 
-    form.addEventListener("submit", async (event) => {
+    registerForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      const username =
-        document.getElementById("username").value.trim();
-      const email =
-        document.getElementById("email").value.trim();
-      const password =
-        document.getElementById("password").value;
-      const confirmPassword =
-        document.getElementById("confirmPassword").value;
+      const username = usernameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
 
-      if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
-        message.textContent =
-          "Username must be 3-30 characters: letters, numbers or _.";
+      if (!username) {
+        message.textContent = "Please enter a username.";
         return;
       }
 
@@ -203,47 +208,75 @@
         return;
       }
 
-      button.disabled = true;
+      registerButton.disabled = true;
       message.textContent = "Creating your account...";
+      message.style.color = "#555";
 
-      let credential;
+      let user = null;
 
       try {
-        credential = await createUserWithEmailAndPassword(
-          auth, email, password
+        // Step 1: Create the Firebase Authentication account.
+        const credential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
         );
 
-        await setDoc(doc(db, "users", credential.user.uid), {
+        user = credential.user;
+
+        // Step 2: Save the user's profile in Firestore.
+        await setDoc(doc(db, "users", user.uid), {
           username: username,
-          email: email,
+          email: user.email,
           createdAt: serverTimestamp()
         });
 
+        // Step 3: Send email verification link.
+        await sendEmailVerification(user);
+
+        // Step 4: Sign out until the email is verified.
+        await signOut(auth);
+
+        message.style.color = "#15803d";
         message.textContent =
-          "Registration successful! Redirecting to Login...";
+          "Account created! A verification link has been sent to your email. Verify it, then log in.";
 
-        await auth.signOut?.();
-        window.location.href = "index.html";
+        registerForm.reset();
+
       } catch (error) {
-        console.error("Registration error:", error.code);
+        console.error(error);
 
-        if (credential?.user) {
-          message.textContent =
-            "Account created, but saving the profile failed. Contact the site administrator before retrying.";
+        if (user) {
+          // Account creation may have succeeded even if a later
+          // step failed. Keep the account; do not delete it.
+          try {
+            await signOut(auth);
+          } catch (signOutError) {
+            console.error(signOutError);
+          }
+
+          if (error.code === "auth/too-many-requests") {
+            message.textContent =
+              "Too many requests. Please try again later.";
+          } else {
+            message.textContent =
+              "Your account may have been created, but a later step failed. " +
+              "Check Firebase Authentication and Firestore before registering again.";
+          }
         } else if (error.code === "auth/email-already-in-use") {
           message.textContent =
-            "This email is already registered. Please log in.";
+            "This email is already registered. Please log in instead.";
         } else if (error.code === "auth/invalid-email") {
-          message.textContent = "Please enter a valid email.";
+          message.textContent = "Please enter a valid email address.";
         } else if (error.code === "auth/weak-password") {
           message.textContent =
-            "Choose a stronger password of at least 6 characters.";
+            "Please choose a stronger password with at least 6 characters.";
         } else {
           message.textContent =
-            "Registration failed. Check Firebase settings and try again.";
+            "Registration failed: " + error.message;
         }
       } finally {
-        button.disabled = false;
+        registerButton.disabled = false;
       }
     });
   </script>
