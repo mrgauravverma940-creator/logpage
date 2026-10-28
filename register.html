@@ -247,15 +247,23 @@
           email: createdUser.email,
           createdAt: serverTimestamp()
         });
+try {
+  await sendEmailVerification(createdUser);
 
-        await sendEmailVerification(createdUser);
-        await signOut(auth);
+  showMessage(
+    "Registration successful! Verification email sent. Check your Gmail and Spam folder.",
+    "green"
+  );
+} catch (emailError) {
+  showMessage(
+    "Account created, but verification email failed: " +
+      emailError.code + " - " + emailError.message,
+    "red"
+  );
+}
 
-        showMessage(
-          "Registration successful! Check your email and spam folder, click the verification link, then log in.",
-          "green"
-        );
-
+await signOut(auth);
+       
         passwordInput.value = "";
         confirmInput.value = "";
 
