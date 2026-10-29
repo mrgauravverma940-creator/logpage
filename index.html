@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,8 +18,6 @@
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-
-      /* GLA University watermark removed */
       background-image: linear-gradient(
         135deg,
         #ff9a9e,
@@ -58,7 +56,7 @@
       width: 35%;
     }
 
-    input[type="email"],
+    input[type="text"],
     input[type="password"] {
       width: 100%;
       min-width: 0;
@@ -122,13 +120,15 @@
     </tr>
 
     <tr>
-      <td><label for="email">Email</label></td>
+      <td><label for="rollNumber">Roll Number</label></td>
       <td>
         <input
-          type="email"
-          id="email"
-          autocomplete="email"
-          placeholder="Enter your email"
+          type="text"
+          id="rollNumber"
+          inputmode="numeric"
+          autocomplete="username"
+          placeholder="Enter roll number"
+          pattern="[0-9]+"
           required
         >
       </td>
@@ -178,9 +178,8 @@
   </table>
 
   <script type="module">
-    import {
-      initializeApp
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
     import {
       getAuth,
@@ -194,8 +193,16 @@
       reload
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
     const firebaseConfig = {
-      apiKey: "AIzaSyB_UIQf1nKgHDfOrdmJwJ3f4zUnr11MBCk",
+      apiKey: "YOUR_FIREBASE_API_KEY",
       authDomain: "logpage-b5d48.firebaseapp.com",
       projectId: "logpage-b5d48",
       storageBucket: "logpage-b5d48.firebasestorage.app",
@@ -206,8 +213,9 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    const emailInput = document.getElementById("email");
+    const rollInput = document.getElementById("rollNumber");
     const passwordInput = document.getElementById("password");
     const rememberInput = document.getElementById("remember");
     const message = document.getElementById("message");
@@ -218,12 +226,41 @@
       message.style.color = color;
     }
 
+    async function findEmailByRollNumber(rollNumber) {
+      const usersRef = collection(db, "users");
+      const rollQuery = query(
+        usersRef,
+        where("rollNumber", "==", rollNumber)
+      );
+
+      const result = await getDocs(rollQuery);
+
+      if (result.empty) {
+        return null;
+      }
+
+      if (result.size > 1) {
+        throw new Error(
+          "This roll number is linked to multiple accounts. Contact the administrator."
+        );
+      }
+
+      return result.docs[0].data().email || null;
+    }
+
     loginBtn.addEventListener("click", async () => {
-      const email = emailInput.value.trim();
+      const rollNumber = rollInput.value.trim();
       const password = passwordInput.value;
 
-      if (!email || !password) {
-        showMessage("Please enter email and password.", "red");
+      if (!/^[0-9]+$/.test(rollNumber)) {
+        showMessage("Please enter a valid numeric roll number.", "red");
+        rollInput.focus();
+        return;
+      }
+
+      if (!password) {
+        showMessage("Please enter your password.", "red");
+        passwordInput.focus();
         return;
       }
 
@@ -238,6 +275,16 @@
             : browserSessionPersistence
         );
 
+        const email = await findEmailByRollNumber(rollNumber);
+
+        if (!email) {
+          showMessage(
+            "No account found for this roll number. Please check it or register first.",
+            "red"
+          );
+          return;
+        }
+
         const credential = await signInWithEmailAndPassword(
           auth,
           email,
@@ -249,18 +296,16 @@
         if (!credential.user.emailVerified) {
           try {
             await sendEmailVerification(credential.user);
-            showMessage(
-              "Your email is not verified. A verification email has been sent. Please verify it and log in again.",
-              "red"
-            );
           } catch (error) {
-            showMessage(
-              "Your email is not verified. Open the verification email already sent to you, or try again later.",
-              "red"
-            );
+            // A verification email may already have been sent.
           }
 
           await signOut(auth);
+
+          showMessage(
+            "Your email is not verified. Check your email verification link, then log in again.",
+            "red"
+          );
           return;
         }
 
@@ -270,21 +315,23 @@
       } catch (error) {
         const messages = {
           "auth/invalid-credential":
-            "Incorrect email or password.",
+            "Incorrect roll number or password.",
           "auth/user-not-found":
-            "No account found with this email.",
+            "Incorrect roll number or password.",
           "auth/wrong-password":
-            "Incorrect email or password.",
-          "auth/invalid-email":
-            "Please enter a valid email.",
+            "Incorrect roll number or password.",
           "auth/too-many-requests":
             "Too many attempts. Please try again later.",
           "auth/network-request-failed":
-            "Network error. Check your internet."
+            "Network error. Check your internet.",
+          "permission-denied":
+            "Database permission denied. Check your Firestore security rules."
         };
 
         showMessage(
-          messages[error.code] || error.message,
+          messages[error.code] ||
+          error.message ||
+          "Login failed. Please try again.",
           "red"
         );
       } finally {
@@ -293,7 +340,7 @@
     });
 
     document.getElementById("resetBtn").addEventListener("click", () => {
-      emailInput.value = "";
+      rollInput.value = "";
       passwordInput.value = "";
       rememberInput.checked = false;
       showMessage("");
@@ -304,36 +351,41 @@
       async (event) => {
         event.preventDefault();
 
-        const email = emailInput.value.trim();
+        const rollNumber = rollInput.value.trim();
 
-        if (!email) {
+        if (!/^[0-9]+$/.test(rollNumber)) {
           showMessage(
-            "Enter your email first, then click Forgot Password.",
+            "Enter your numeric roll number first.",
             "red"
           );
-          emailInput.focus();
+          rollInput.focus();
           return;
         }
 
         try {
+          showMessage("Finding your registered account...");
+
+          const email = await findEmailByRollNumber(rollNumber);
+
+          if (!email) {
+            showMessage(
+              "No account found for this roll number.",
+              "red"
+            );
+            return;
+          }
+
           await sendPasswordResetEmail(auth, email);
-          showMessage(
-            "If an account exists for this email, a password reset link has been sent. Check your inbox and spam folder.",
-            "green"
-          );
-        } catch (error) {
-          const messages = {
-            "auth/invalid-email":
-              "Please enter a valid email.",
-            "auth/too-many-requests":
-              "Too many attempts. Try again later.",
-            "auth/network-request-failed":
-              "Network error. Check your internet."
-          };
 
           showMessage(
-            messages[error.code] ||
-            "Could not send the reset email. Check the email and try again.",
+            "If your account exists, a password reset link has been sent to its registered email. Check your inbox and spam folder.",
+            "green"
+          );
+
+        } catch (error) {
+          showMessage(
+            error.message ||
+            "Could not send the reset email. Please try again later.",
             "red"
           );
         }
@@ -342,3 +394,4 @@
   </script>
 </body>
 </html>
+```
