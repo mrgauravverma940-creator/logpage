@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +7,12 @@
   <title>Registration - GLA University</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       min-height: 100vh;
       margin: 0;
+      padding: 20px 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -26,12 +26,12 @@
     }
 
     table {
-      width: 380px;
+      width: 420px;
       max-width: 94vw;
       background: white;
       border: 2px solid #333;
       border-collapse: collapse;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 5px 15px #0004;
     }
 
     th {
@@ -46,9 +46,7 @@
       border: 1px solid #ddd;
     }
 
-    td:first-child {
-      width: 35%;
-    }
+    td:first-child { width: 35%; }
 
     input {
       width: 100%;
@@ -59,7 +57,7 @@
     }
 
     button {
-      padding: 10px 16px;
+      padding: 10px 14px;
       border: none;
       border-radius: 4px;
       background: #2c3e50;
@@ -67,18 +65,9 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background: #1a252f;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    a {
-      color: #174ea6;
-    }
+    button:hover { background: #1a252f; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    a { color: #174ea6; }
 
     #message {
       padding: 10px;
@@ -87,54 +76,66 @@
     }
 
     @media (max-width: 380px) {
-      td {
-        padding: 7px;
-      }
+      td { padding: 7px; }
     }
   </style>
 </head>
 
 <body>
   <table>
-    <tr>
-      <th colspan="2">Registration</th>
-    </tr>
+    <tr><th colspan="2">Registration</th></tr>
 
     <tr>
       <td><label for="username">Username</label></td>
       <td>
-        <input type="text" id="username"
-               autocomplete="username"
-               placeholder="Enter username"
-               minlength="3" maxlength="30" required>
+        <input id="username" type="text"
+          autocomplete="username"
+          placeholder="Enter username"
+          minlength="3" maxlength="30" required>
       </td>
     </tr>
 
     <tr>
       <td><label for="email">Email</label></td>
       <td>
-        <input type="email" id="email"
-               autocomplete="email"
-               placeholder="Enter email" required>
+        <input id="email" type="email"
+          autocomplete="email"
+          placeholder="Enter email" required>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2" style="text-align:center">
+        <button type="button" id="sendOtpBtn">Send OTP</button>
+      </td>
+    </tr>
+
+    <tr>
+      <td><label for="otp">6-Digit OTP</label></td>
+      <td>
+        <input id="otp" type="text" inputmode="numeric"
+          autocomplete="one-time-code"
+          placeholder="Enter OTP" maxlength="6"
+          pattern="[0-9]{6}" required>
       </td>
     </tr>
 
     <tr>
       <td><label for="password">Password</label></td>
       <td>
-        <input type="password" id="password"
-               autocomplete="new-password"
-               placeholder="Create password"
-               minlength="6" required>
+        <input id="password" type="password"
+          autocomplete="new-password"
+          placeholder="Create password"
+          minlength="6" required>
       </td>
     </tr>
 
     <tr>
       <td><label for="confirmPassword">Confirm Password</label></td>
       <td>
-        <input type="password" id="confirmPassword"
-               autocomplete="new-password"
-               placeholder="Confirm password" required>
+        <input id="confirmPassword" type="password"
+          autocomplete="new-password"
+          placeholder="Confirm password" required>
       </td>
     </tr>
 
@@ -157,22 +158,32 @@
   </table>
 
   <script type="module">
+    import emailjs from
+      "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm";
+
     import { initializeApp } from
       "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
     import {
       getAuth,
-      createUserWithEmailAndPassword,
-      sendEmailVerification,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+      createUserWithEmailAndPassword
+    } from
+      "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
     import {
       getFirestore,
       doc,
       setDoc,
       serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    } from
+      "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    // EmailJS: replace this with your Account > General Public Key.
+    const EMAILJS_PUBLIC_KEY = "PASTE_YOUR_PUBLIC_KEY_HERE";
+    const SERVICE_ID = "service_1zheuj9";
+    const TEMPLATE_ID = "template_8xv3k2j";
+
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
     const firebaseConfig = {
       apiKey: "AIzaSyB_UIQf1nKgHDfOrdmJwJ3f4zUnr11MBCk",
@@ -190,32 +201,134 @@
 
     const usernameInput = document.getElementById("username");
     const emailInput = document.getElementById("email");
+    const otpInput = document.getElementById("otp");
     const passwordInput = document.getElementById("password");
     const confirmInput = document.getElementById("confirmPassword");
+    const sendOtpBtn = document.getElementById("sendOtpBtn");
     const registerBtn = document.getElementById("registerBtn");
     const message = document.getElementById("message");
+
+    let generatedOtp = "";
+    let otpEmail = "";
+    let otpExpiry = 0;
+    let otpVerified = false;
+    let otpSending = false;
+    let registrationInProgress = false;
 
     function showMessage(text, color = "#222") {
       message.textContent = text;
       message.style.color = color;
     }
 
+    function validUsername() {
+      return /^[a-zA-Z0-9_]{3,30}$/.test(
+        usernameInput.value.trim()
+      );
+    }
+
+    function clearOtp() {
+      generatedOtp = "";
+      otpEmail = "";
+      otpExpiry = 0;
+      otpVerified = false;
+      otpInput.value = "";
+    }
+
+    emailInput.addEventListener("input", () => {
+      if (emailInput.value.trim() !== otpEmail) {
+        clearOtp();
+        showMessage("Email changed. Please request a new OTP.");
+      }
+    });
+
+    sendOtpBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+
+      if (!emailInput.checkValidity() || !email) {
+        showMessage("Please enter a valid email address.", "red");
+        emailInput.focus();
+        return;
+      }
+
+      if (otpSending || registrationInProgress) return;
+
+      if (EMAILJS_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_KEY_HERE") {
+        showMessage("Please add your EmailJS Public Key in the code.", "red");
+        return;
+      }
+
+      otpSending = true;
+      sendOtpBtn.disabled = true;
+      clearOtp();
+      showMessage("Sending OTP to your email...");
+
+      // Demo implementation: browser-generated OTP.
+      const code = String(
+        Math.floor(100000 + Math.random() * 900000)
+      );
+
+      try {
+        await emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+          to_email: email,
+          passcode: code,
+          time: "15 minutes"
+        });
+
+        generatedOtp = code;
+        otpEmail = email;
+        otpExpiry = Date.now() + 15 * 60 * 1000;
+
+        showMessage(
+          "OTP sent successfully! Check your Inbox and Spam folder.",
+          "green"
+        );
+      } catch (error) {
+        console.error("EmailJS error:", error);
+        showMessage(
+          "OTP email could not be sent. Check EmailJS settings and try again.",
+          "red"
+        );
+      } finally {
+        otpSending = false;
+        sendOtpBtn.disabled = false;
+      }
+    });
+
     registerBtn.addEventListener("click", async () => {
+      if (registrationInProgress) return;
+
       const username = usernameInput.value.trim();
       const email = emailInput.value.trim();
       const password = passwordInput.value;
       const confirmPassword = confirmInput.value;
+      const enteredOtp = otpInput.value.trim();
 
-      if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
+      if (!validUsername()) {
         showMessage(
-          "Username must be 3-30 characters and contain only letters, numbers, or underscores.",
+          "Username must be 3-30 characters: letters, numbers or underscores only.",
           "red"
         );
         return;
       }
 
-      if (!email || !password || !confirmPassword) {
-        showMessage("Please fill in all fields.", "red");
+      if (!emailInput.checkValidity() || !email) {
+        showMessage("Please enter a valid email.", "red");
+        return;
+      }
+
+      if (!generatedOtp || otpEmail !== email) {
+        showMessage("Please send an OTP to this email first.", "red");
+        return;
+      }
+
+      if (Date.now() > otpExpiry) {
+        clearOtp();
+        showMessage("OTP expired. Please send a new OTP.", "red");
+        return;
+      }
+
+      if (!/^\d{6}$/.test(enteredOtp) || enteredOtp !== generatedOtp) {
+        showMessage("Incorrect OTP. Please check and try again.", "red");
         return;
       }
 
@@ -229,7 +342,9 @@
         return;
       }
 
+      registrationInProgress = true;
       registerBtn.disabled = true;
+      sendOtpBtn.disabled = true;
       showMessage("Creating your account...");
 
       let createdUser = null;
@@ -242,57 +357,59 @@
         createdUser = credential.user;
 
         await setDoc(doc(db, "users", createdUser.uid), {
-          username: username,
+          username,
           email: createdUser.email,
           createdAt: serverTimestamp()
         });
-try {
-  await sendEmailVerification(createdUser);
 
-  showMessage(
-    "Registration successful! Verification email sent. Check your Gmail and Spam folder.",
-    "green"
-  );
-} catch (emailError) {
-  showMessage(
-    "Account created, but verification email failed: " +
-      emailError.code + " - " + emailError.message,
-    "red"
-  );
-}
-
-await signOut(auth);
-       
+        clearOtp();
         passwordInput.value = "";
         confirmInput.value = "";
+        otpInput.value = "";
+
+        showMessage(
+          "Registration successful! You can now log in.",
+          "green"
+        );
+
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1800);
 
       } catch (error) {
+        console.error("Registration error:", error);
+
         const messages = {
-          "auth/email-already-in-use": "This email is already registered. Please log in instead.",
-          "auth/invalid-email": "Please enter a valid email address.",
-          "auth/weak-password": "Please choose a stronger password.",
-          "auth/too-many-requests": "Too many attempts. Please try again later.",
-          "auth/network-request-failed": "Network error. Check your internet connection.",
-          "permission-denied": "Firestore permission denied. Please check your Firestore rules."
+          "auth/email-already-in-use":
+            "This email is already registered. Please log in.",
+          "auth/invalid-email":
+            "Please enter a valid email address.",
+          "auth/weak-password":
+            "Please choose a stronger password.",
+          "auth/too-many-requests":
+            "Too many attempts. Please try again later.",
+          "auth/network-request-failed":
+            "Network error. Check your internet connection.",
+          "permission-denied":
+            "Database permission denied. Check Firestore rules."
         };
 
         showMessage(
           messages[error.code] ||
-          (error.code === "permission-denied"
-            ? messages["permission-denied"]
-            : "Registration could not be completed: " + error.message),
+          "Registration failed: " + (error.message || error.code),
           "red"
         );
 
-        // If account creation succeeded but a later step failed,
-        // do not try to create the same account again automatically.
         if (createdUser) {
-          try {
-            await signOut(auth);
-          } catch (_) {}
+          showMessage(
+            "The account may have been created, but saving its profile failed. Check Firebase before trying again.",
+            "red"
+          );
         }
       } finally {
+        registrationInProgress = false;
         registerBtn.disabled = false;
+        sendOtpBtn.disabled = false;
       }
     });
   </script>
