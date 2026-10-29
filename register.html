@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,9 +18,7 @@
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-
-      /* Gradient background without watermark */
-      background-image: linear-gradient(
+      background: linear-gradient(
         135deg,
         #ff9a9e,
         #fad0c4,
@@ -122,6 +119,7 @@
           id="rollNumber"
           type="text"
           inputmode="numeric"
+          autocomplete="username"
           placeholder="Enter Roll Number"
           maxlength="20"
           pattern="[0-9]+"
@@ -232,7 +230,6 @@
     } from
       "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-    // EmailJS settings
     const EMAILJS_PUBLIC_KEY = "3DsW5p7HS1GzXOydE";
     const SERVICE_ID = "service_1zheuj9";
     const TEMPLATE_ID = "template_8xv3k2j";
@@ -241,7 +238,6 @@
       publicKey: EMAILJS_PUBLIC_KEY
     });
 
-    // Firebase settings
     const firebaseConfig = {
       apiKey: "AIzaSyB_UIQf1nKgHDfOrdmJwJ3f4zUnr11MBCk",
       authDomain: "logpage-b5d48.firebaseapp.com",
@@ -256,22 +252,14 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const rollNumberInput =
-      document.getElementById("rollNumber");
-    const emailInput =
-      document.getElementById("email");
-    const otpInput =
-      document.getElementById("otp");
-    const passwordInput =
-      document.getElementById("password");
-    const confirmInput =
-      document.getElementById("confirmPassword");
-    const sendOtpBtn =
-      document.getElementById("sendOtpBtn");
-    const registerBtn =
-      document.getElementById("registerBtn");
-    const message =
-      document.getElementById("message");
+    const rollNumberInput = document.getElementById("rollNumber");
+    const emailInput = document.getElementById("email");
+    const otpInput = document.getElementById("otp");
+    const passwordInput = document.getElementById("password");
+    const confirmInput = document.getElementById("confirmPassword");
+    const sendOtpBtn = document.getElementById("sendOtpBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const message = document.getElementById("message");
 
     let generatedOtp = "";
     let otpEmail = "";
@@ -286,9 +274,7 @@
     }
 
     function validRollNumber() {
-      return /^[0-9]{1,20}$/.test(
-        rollNumberInput.value.trim()
-      );
+      return /^[0-9]{1,20}$/.test(rollNumberInput.value.trim());
     }
 
     function clearOtp() {
@@ -299,7 +285,6 @@
       otpInput.value = "";
     }
 
-    // Changing email invalidates the previous OTP.
     emailInput.addEventListener("input", () => {
       if (emailInput.value.trim() !== otpEmail) {
         clearOtp();
@@ -310,7 +295,6 @@
       }
     });
 
-    // Send OTP
     sendOtpBtn.addEventListener("click", async () => {
       const email = emailInput.value.trim();
 
@@ -325,7 +309,6 @@
       otpSending = true;
       sendOtpBtn.disabled = true;
       clearOtp();
-
       showMessage("Sending OTP to your email...");
 
       const code = String(
@@ -359,7 +342,6 @@
       }
     });
 
-    // Register
     registerBtn.addEventListener("click", async () => {
       if (registrationInProgress) return;
 
@@ -370,10 +352,7 @@
       const enteredOtp = otpInput.value.trim();
 
       if (!validRollNumber()) {
-        showMessage(
-          "Invalid Roll Number. Enter numbers only.",
-          "red"
-        );
+        showMessage("Invalid Roll Number. Enter numbers only.", "red");
         rollNumberInput.focus();
         return;
       }
@@ -402,22 +381,27 @@
 
       if (otpAttempts >= 5) {
         clearOtp();
-        showMessage("Too many incorrect attempts. Request a new OTP.", "red");
+        showMessage(
+          "Too many incorrect attempts. Request a new OTP.",
+          "red"
+        );
         return;
       }
 
       if (enteredOtp !== generatedOtp) {
         otpAttempts++;
         showMessage(
-          "Incorrect OTP. Attempts remaining: " +
-          (5 - otpAttempts),
+          "Incorrect OTP. Attempts remaining: " + (5 - otpAttempts),
           "red"
         );
         return;
       }
 
       if (password.length < 6) {
-        showMessage("Password must contain at least 6 characters.", "red");
+        showMessage(
+          "Password must contain at least 6 characters.",
+          "red"
+        );
         passwordInput.focus();
         return;
       }
@@ -431,18 +415,16 @@
       registrationInProgress = true;
       registerBtn.disabled = true;
       sendOtpBtn.disabled = true;
-
       showMessage("Creating your account...");
 
       let createdUser = null;
 
       try {
-        const credential =
-          await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
+        const credential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
 
         createdUser = credential.user;
 
@@ -505,4 +487,3 @@
   </script>
 </body>
 </html>
-```
