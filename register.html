@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registration - GLA University</title>
+  <title>Registration</title>
 
   <style>
     * {
@@ -19,11 +19,18 @@
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-      background-image:
-        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='90'><text x='15' y='55' font-family='Arial' font-size='14' font-weight='bold' fill='white' fill-opacity='0.6' transform='rotate(-20 85 45)'>GLA University</text></svg>"),
-        linear-gradient(135deg, #ff9a9e, #fad0c4, #a18cd1, #84fab0, #8fd3f4);
-      background-repeat: repeat, no-repeat;
-      background-size: auto, cover;
+
+      /* Gradient background without watermark */
+      background-image: linear-gradient(
+        135deg,
+        #ff9a9e,
+        #fad0c4,
+        #a18cd1,
+        #84fab0,
+        #8fd3f4
+      );
+      background-repeat: no-repeat;
+      background-size: cover;
       background-attachment: fixed;
     }
 
@@ -109,9 +116,7 @@
     </tr>
 
     <tr>
-      <td>
-        <label for="rollNumber">Roll Number</label>
-      </td>
+      <td><label for="rollNumber">Roll Number</label></td>
       <td>
         <input
           id="rollNumber"
@@ -120,16 +125,14 @@
           placeholder="Enter Roll Number"
           maxlength="20"
           pattern="[0-9]+"
-          title="Roll Number mein sirf numbers enter karein"
+          title="Enter numbers only"
           required
         >
       </td>
     </tr>
 
     <tr>
-      <td>
-        <label for="email">Email</label>
-      </td>
+      <td><label for="email">Email</label></td>
       <td>
         <input
           id="email"
@@ -148,9 +151,7 @@
     </tr>
 
     <tr>
-      <td>
-        <label for="otp">6-Digit OTP</label>
-      </td>
+      <td><label for="otp">6-Digit OTP</label></td>
       <td>
         <input
           id="otp"
@@ -166,9 +167,7 @@
     </tr>
 
     <tr>
-      <td>
-        <label for="password">Password</label>
-      </td>
+      <td><label for="password">Password</label></td>
       <td>
         <input
           id="password"
@@ -182,9 +181,7 @@
     </tr>
 
     <tr>
-      <td>
-        <label for="confirmPassword">Confirm Password</label>
-      </td>
+      <td><label for="confirmPassword">Confirm Password</label></td>
       <td>
         <input
           id="confirmPassword"
@@ -261,25 +258,18 @@
 
     const rollNumberInput =
       document.getElementById("rollNumber");
-
     const emailInput =
       document.getElementById("email");
-
     const otpInput =
       document.getElementById("otp");
-
     const passwordInput =
       document.getElementById("password");
-
     const confirmInput =
       document.getElementById("confirmPassword");
-
     const sendOtpBtn =
       document.getElementById("sendOtpBtn");
-
     const registerBtn =
       document.getElementById("registerBtn");
-
     const message =
       document.getElementById("message");
 
@@ -295,7 +285,6 @@
       message.style.color = color;
     }
 
-    // Roll Number: digits only.
     function validRollNumber() {
       return /^[0-9]{1,20}$/.test(
         rollNumberInput.value.trim()
@@ -321,19 +310,17 @@
       }
     });
 
-    // Send OTP email.
+    // Send OTP
     sendOtpBtn.addEventListener("click", async () => {
       const email = emailInput.value.trim();
 
-      if (!emailInput.checkValidity() || !email) {
+      if (!email || !emailInput.checkValidity()) {
         showMessage("Please enter a valid email address.", "red");
         emailInput.focus();
         return;
       }
 
-      if (otpSending || registrationInProgress) {
-        return;
-      }
+      if (otpSending || registrationInProgress) return;
 
       otpSending = true;
       sendOtpBtn.disabled = true;
@@ -341,7 +328,6 @@
 
       showMessage("Sending OTP to your email...");
 
-      // Demo OTP: generated in the browser.
       const code = String(
         Math.floor(100000 + Math.random() * 900000)
       );
@@ -363,9 +349,8 @@
         );
       } catch (error) {
         console.error("EmailJS error:", error);
-
         showMessage(
-          "OTP email could not be sent. Check your EmailJS service, template and parameter names.",
+          "OTP email failed. Check EmailJS Service, Template and variable names.",
           "red"
         );
       } finally {
@@ -374,11 +359,9 @@
       }
     });
 
-    // Register account.
+    // Register
     registerBtn.addEventListener("click", async () => {
-      if (registrationInProgress) {
-        return;
-      }
+      if (registrationInProgress) return;
 
       const rollNumber = rollNumberInput.value.trim();
       const email = emailInput.value.trim();
@@ -388,33 +371,27 @@
 
       if (!validRollNumber()) {
         showMessage(
-          "Invalid Roll Number! Sirf numbers (0-9) enter karein.",
+          "Invalid Roll Number. Enter numbers only.",
           "red"
         );
         rollNumberInput.focus();
         return;
       }
 
-      if (!emailInput.checkValidity() || !email) {
+      if (!email || !emailInput.checkValidity()) {
         showMessage("Please enter a valid email.", "red");
         emailInput.focus();
         return;
       }
 
       if (!generatedOtp || otpEmail !== email) {
-        showMessage(
-          "Please send an OTP to this email first.",
-          "red"
-        );
+        showMessage("Please send an OTP to this email first.", "red");
         return;
       }
 
       if (Date.now() > otpExpiry) {
         clearOtp();
-        showMessage(
-          "OTP expired. Please send a new OTP.",
-          "red"
-        );
+        showMessage("OTP expired. Please send a new OTP.", "red");
         return;
       }
 
@@ -425,16 +402,12 @@
 
       if (otpAttempts >= 5) {
         clearOtp();
-        showMessage(
-          "Too many incorrect attempts. Request a new OTP.",
-          "red"
-        );
+        showMessage("Too many incorrect attempts. Request a new OTP.", "red");
         return;
       }
 
       if (enteredOtp !== generatedOtp) {
         otpAttempts++;
-
         showMessage(
           "Incorrect OTP. Attempts remaining: " +
           (5 - otpAttempts),
@@ -444,10 +417,7 @@
       }
 
       if (password.length < 6) {
-        showMessage(
-          "Password must contain at least 6 characters.",
-          "red"
-        );
+        showMessage("Password must contain at least 6 characters.", "red");
         passwordInput.focus();
         return;
       }
