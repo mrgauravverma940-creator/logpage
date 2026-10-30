@@ -1,412 +1,170 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Student Dashboard</title>
+import Navbar from './Navbar'
+import { getUser, go } from './auth'
 
-  <style>
-    * { box-sizing: border-box; }
+const EXAMS = [
+  {
+    key: 'college_computer_science',
+    title: 'Computer Science',
+    desc: 'Algorithms, data structures, operating systems and core CS concepts.',
+    icon: 'CS',
+    category: 'TECHNICAL',
+  },
+  {
+    key: 'computer_security',
+    title: 'Computer Security',
+    desc: 'Cryptography, network security and secure computing.',
+    icon: 'SEC',
+    category: 'CYBERSECURITY',
+  },
+  {
+    key: 'machine_learning',
+    title: 'Machine Learning',
+    desc: 'ML concepts, model selection and performance evaluation.',
+    icon: 'ML',
+    category: 'ARTIFICIAL INTELLIGENCE',
+  },
+  {
+    key: 'science_basic',
+    title: 'General Science',
+    desc: 'Test your knowledge of fundamental science concepts.',
+    icon: 'GS',
+    category: 'GENERAL',
+  },
+]
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f7fb;
-      color: #253047;
+export default function Dashboard() {
+  const user = getUser()
+
+  function startExam(exam) {
+    // Check whether the student is logged in
+    const currentUser = getUser()
+
+    if (!currentUser) {
+      go('login')
+      return
     }
 
-    .sidebar {
-      width: 240px;
-      height: 100vh;
-      position: fixed;
-      left: 0;
-      top: 0;
-      background: #17243b;
-      color: white;
-      padding: 25px 16px;
-    }
+    // Save selected exam and open exam page
+    sessionStorage.setItem('es_category', exam.key)
+    go('exam')
+  }
 
-    .logo {
-      font-size: 23px;
-      font-weight: bold;
-      margin: 5px 10px 35px;
-    }
+  return (
+    <>
+      <Navbar />
 
-    .nav-link {
-      display: block;
-      color: #dce5f5;
-      text-decoration: none;
-      padding: 14px;
-      border-radius: 9px;
-      margin: 7px 0;
-    }
+      <main className="portal">
+        <section className="portal-welcome">
+          <div className="welcome-copy">
+            <span className="eyebrow">STUDENT ASSESSMENT PORTAL</span>
 
-    .nav-link:hover, .nav-link.active {
-      background: #344866;
-      color: white;
-    }
+            <h1>
+              Welcome back, <span>{user?.name || 'Student'}</span>
+            </h1>
 
-    .main { margin-left: 240px; padding: 28px; }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
-
-    .topbar h1 { margin: 0 0 8px; font-size: 28px; }
-    .muted { color: #758198; }
-
-    .profile {
-      background: white;
-      border-radius: 12px;
-      padding: 12px 18px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 3px 12px #17243b0c;
-    }
-
-    .avatar {
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      background: #e1eaff;
-      color: #254b9b;
-      border-radius: 50%;
-      font-weight: bold;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 18px;
-      margin-bottom: 25px;
-    }
-
-    .card {
-      background: white;
-      padding: 22px;
-      border-radius: 14px;
-      box-shadow: 0 3px 15px #17243b0a;
-      min-width: 0;
-    }
-
-    .card h3 {
-      font-size: 15px;
-      color: #758198;
-      margin: 0 0 16px;
-    }
-
-    .number { font-size: 29px; font-weight: bold; margin-bottom: 9px; }
-    .section-title { margin: 30px 0 16px; font-size: 21px; }
-
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr;
-      gap: 20px;
-    }
-
-    .course { padding: 16px 0; border-bottom: 1px solid #edf0f5; }
-    .course:last-child { border-bottom: none; }
-
-    .course-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .progress {
-      height: 8px;
-      background: #edf0f5;
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    .progress div { height: 100%; background: #5579e8; border-radius: 20px; }
-
-    .actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .action {
-      display: block;
-      padding: 17px 12px;
-      border: 1px solid #e7ebf3;
-      border-radius: 10px;
-      text-decoration: none;
-      color: #253047;
-      background: #fbfcff;
-      font-weight: bold;
-    }
-
-    .action:hover { background: #eef3ff; }
-
-    .action small {
-      display: block;
-      margin-top: 8px;
-      color: #758198;
-      font-weight: normal;
-      line-height: 1.4;
-    }
-
-    button {
-      border: 0;
-      border-radius: 8px;
-      padding: 11px 16px;
-      background: #e9efff;
-      color: #254b9b;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover { background: #d7e2ff; }
-    .logout { background: #ffe9e9; color: #b42323; width: 100%; margin-top: 25px; }
-    .logout:hover { background: #ffdada; }
-    #status { margin-top: 15px; font-size: 14px; }
-
-    @media (max-width: 1000px) {
-      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .content-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 650px) {
-      .sidebar { position: static; width: 100%; height: auto; padding: 15px; }
-      .logo { margin: 5px 8px 15px; }
-      .nav-link { display: inline-block; padding: 10px; margin: 3px; }
-      .logout { width: auto; margin: 10px 3px 0; }
-      .main { margin-left: 0; padding: 18px 13px; }
-      .topbar h1 { font-size: 23px; }
-      .cards { gap: 10px; }
-      .card { padding: 15px; }
-      .number { font-size: 24px; }
-    }
-  </style>
-</head>
-
-<body>
-  <aside class="sidebar">
-    <div class="logo">My Dashboard</div>
-    <nav>
-      <a class="nav-link active" href="#home">🏠 Home</a>
-      <a class="nav-link" href="#courses">📚 My Courses</a>
-      <a class="nav-link" href="#coding">💻 Coding Practice</a>
-      <a class="nav-link" href="#quiz">📝 Quiz & Tasks</a>
-      <a class="nav-link" href="#progress">📊 My Progress</a>
-    </nav>
-    <button class="logout" id="logoutBtn">Log Out</button>
-  </aside>
-
-  <main class="main" id="home">
-    <header class="topbar">
-      <div>
-        <h1 id="welcomeHeading">Welcome back! 👋</h1>
-        <div class="muted">Keep learning. Keep growing.</div>
-      </div>
-
-      <div class="profile">
-        <div class="avatar" id="userAvatar">S</div>
-        <div>
-          <strong id="profileName">Student</strong>
-          <div class="muted" id="profileEmail" style="font-size:13px;margin-top:5px">
-            Loading account...
+            <p>
+              Choose your assessment, prepare your workspace, and give it
+              your best. Your progress starts here.
+            </p>
           </div>
-        </div>
-      </div>
-    </header>
 
-    <section class="cards">
-      <div class="card">
-        <h3>My Courses</h3>
-        <div class="number">3</div>
-        <div class="muted">HTML, CSS and C</div>
-      </div>
-      <div class="card">
-        <h3>Completed Tasks</h3>
-        <div class="number" id="tasksCount">0</div>
-        <div class="muted">Tasks marked complete</div>
-      </div>
-      <div class="card">
-        <h3>Quiz Completed</h3>
-        <div class="number" id="quizCount">0</div>
-        <div class="muted">Quizzes completed here</div>
-      </div>
-      <div class="card">
-        <h3>Learning Goal</h3>
-        <div class="number">Daily</div>
-        <div class="muted">Practice a little every day</div>
-      </div>
-    </section>
+          <div className="welcome-badge">
+            <span className="welcome-badge-icon">✓</span>
+            <div>
+              <strong>Secure assessments</strong>
+              <small>AI-assisted proctoring</small>
+            </div>
+          </div>
+        </section>
 
-    <h2 class="section-title" id="courses">My Learning</h2>
+        <section className="assessment-summary">
+          <div className="summary-item">
+            <span className="summary-symbol">04</span>
+            <div>
+              <strong>Assessments</strong>
+              <small>Available to you</small>
+            </div>
+          </div>
 
-    <div class="content-grid">
-      <section class="card" id="progress">
-        <h3>My Courses & Progress</h3>
+          <div className="summary-item">
+            <span className="summary-symbol">10</span>
+            <div>
+              <strong>Questions each</strong>
+              <small>Per assessment</small>
+            </div>
+          </div>
 
-        <div class="course">
-          <div class="course-top"><strong>HTML</strong><span class="muted">Beginner</span></div>
-          <div class="progress"><div style="width:35%"></div></div>
-        </div>
-        <div class="course">
-          <div class="course-top"><strong>CSS</strong><span class="muted">Beginner</span></div>
-          <div class="progress"><div style="width:20%"></div></div>
-        </div>
-        <div class="course">
-          <div class="course-top"><strong>C Programming</strong><span class="muted">Beginner</span></div>
-          <div class="progress"><div style="width:15%"></div></div>
-        </div>
-        <p class="muted" style="font-size:12px">Sample progress values. Update them as you learn.</p>
-      </section>
+          <div className="summary-item">
+            <span className="summary-symbol">10m</span>
+            <div>
+              <strong>Time limit</strong>
+              <small>For each assessment</small>
+            </div>
+          </div>
+        </section>
 
-      <section class="card" id="coding">
-        <h3>Quick Access</h3>
-        <div class="actions">
-          <a class="action" href="https://www.w3schools.com/html/">🌐 HTML<small>Learn webpage structure</small></a>
-          <a class="action" href="https://www.w3schools.com/css/">🎨 CSS<small>Learn webpage design</small></a>
-          <a class="action" href="https://www.w3schools.com/c/">💻 C Programming<small>Practice programming basics</small></a>
-          <a class="action" href="https://www.hackerrank.com/domains/c">🧩 Coding Practice<small>Solve C programming problems</small></a>
-        </div>
-      </section>
-    </div>
+        <section className="assessment-section">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">YOUR LEARNING SPACE</span>
+              <h2>Available assessments</h2>
+              <p>Select a subject to begin your assessment.</p>
+            </div>
 
-    <h2 class="section-title" id="quiz">My Daily Tasks</h2>
-    <section class="card">
-      <label style="display:block;padding:10px 0"><input type="checkbox" class="task"> Practice HTML for 20 minutes</label>
-      <label style="display:block;padding:10px 0"><input type="checkbox" class="task"> Learn one CSS concept</label>
-      <label style="display:block;padding:10px 0"><input type="checkbox" class="task"> Solve one C programming problem</label>
-      <label style="display:block;padding:10px 0"><input type="checkbox" class="task"> Revise today's college notes</label>
+            <span className="available-count">04 AVAILABLE</span>
+          </div>
 
-      <button id="saveTasks" style="margin-top:15px">Save Task Progress</button>
-      <button id="completeQuiz" style="margin:15px 0 0 8px">Mark One Quiz Complete</button>
-      <p id="status" aria-live="polite"></p>
-    </section>
-  </main>
+          <div className="assessment-grid">
+            {EXAMS.map((exam) => (
+              <article className="assessment-card" key={exam.key}>
+                <div className="assessment-card-top">
+                  <div className="subject-icon">{exam.icon}</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+                  <span className="proctor-tag">
+                    <span className="status-dot"></span>
+                    Proctored
+                  </span>
+                </div>
 
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+                <span className="subject-category">{exam.category}</span>
 
-    import {
-      getFirestore,
-      doc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+                <h3>{exam.title}</h3>
+                <p className="assessment-description">{exam.desc}</p>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB_UIQf1nKgHDfOrdmJwJ3f4zUnr11MBCk",
-      authDomain: "logpage-b5d48.firebaseapp.com",
-      projectId: "logpage-b5d48",
-      storageBucket: "logpage-b5d48.firebasestorage.app",
-      messagingSenderId: "1036796191778",
-      appId: "1:1036796191778:web:66dbb4aae131310e22167b",
-      measurementId: "G-17VKE891SF"
-    };
+                <div className="assessment-meta">
+                  <span>◷ 10 minutes</span>
+                  <span>▤ 10 questions</span>
+                </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+                <button
+                  type="button"
+                  className="assessment-start"
+                  onClick={() => startExam(exam)}
+                >
+                  Start assessment
+                  <span aria-hidden="true">→</span>
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
 
-    const status = document.getElementById("status");
-    const tasks = [...document.querySelectorAll(".task")];
+        <section className="exam-notice">
+          <div className="notice-icon">i</div>
+          <div>
+            <strong>Before you begin</strong>
+            <p>
+              Allow camera access and enable fullscreen when prompted.
+              Ensure you have a stable internet connection before starting.
+            </p>
+          </div>
+        </section>
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.replace("index.html");
-        return;
-      }
-
-      let username = user.displayName || "";
-
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists() && userDoc.data().username) {
-          username = userDoc.data().username;
-        }
-      } catch (error) {
-        console.error("Could not load username from Firestore:", error);
-      }
-
-      if (!username) {
-        username = user.email?.split("@")[0] || "Student";
-      }
-
-      document.getElementById("welcomeHeading").textContent =
-        `Welcome back, ${username}! 👋`;
-
-      document.getElementById("profileName").textContent = username;
-      document.getElementById("profileEmail").textContent =
-        user.email || "Email not available";
-
-      document.getElementById("userAvatar").textContent =
-        username.trim().charAt(0).toUpperCase() || "S";
-    });
-
-    // Load task progress saved in this browser.
-    try {
-      const saved = JSON.parse(localStorage.getItem("studentTasks") || "[]");
-      tasks.forEach((task, i) => {
-        task.checked = Boolean(saved[i]);
-      });
-    } catch (error) {
-      console.warn("Could not load saved tasks.");
-    }
-
-    function updateTaskCount() {
-      document.getElementById("tasksCount").textContent =
-        tasks.filter(task => task.checked).length;
-    }
-
-    updateTaskCount();
-
-    document.getElementById("saveTasks").addEventListener("click", () => {
-      try {
-        localStorage.setItem(
-          "studentTasks",
-          JSON.stringify(tasks.map(task => task.checked))
-        );
-        updateTaskCount();
-        status.textContent = "Task progress saved on this device!";
-        status.style.color = "green";
-      } catch (error) {
-        status.textContent = "Could not save progress in this browser.";
-        status.style.color = "red";
-      }
-    });
-
-    tasks.forEach(task => {
-      task.addEventListener("change", updateTaskCount);
-    });
-
-    // Demo counter only; this does not grade a real quiz.
-    document.getElementById("completeQuiz").addEventListener("click", () => {
-      const count = Number(document.getElementById("quizCount").textContent);
-      document.getElementById("quizCount").textContent = count + 1;
-      status.textContent = "Demo counter updated. No actual quiz has been graded.";
-      status.style.color = "#254b9b";
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        window.location.replace("index.html");
-      } catch (error) {
-        status.textContent = "Logout failed. Please try again.";
-        status.style.color = "red";
-      }
-    });
-  </script>
-</body>
-</html>
+        <footer className="portal-footer">
+          <span>Smart Proctoring Browser</span>
+          <span>Secure assessments · Fair evaluation</span>
+        </footer>
+      </main>
+    </>
+  )
+}
