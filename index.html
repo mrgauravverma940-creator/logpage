@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>Student Login</title>
 
   <style>
     * {
@@ -14,30 +14,21 @@
     body {
       min-height: 100vh;
       margin: 0;
+      padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-      background-image: linear-gradient(
-        135deg,
-        #ff9a9e,
-        #fad0c4,
-        #a18cd1,
-        #84fab0,
-        #8fd3f4
-      );
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-attachment: fixed;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #a18cd1, #84fab0, #8fd3f4);
     }
 
     table {
-      width: 340px;
+      width: 380px;
       max-width: 94vw;
       background: white;
       border: 2px solid #333;
       border-collapse: collapse;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 5px 15px #0004;
     }
 
     th {
@@ -56,34 +47,36 @@
       width: 35%;
     }
 
-    input[type="text"],
+    input[type="email"],
     input[type="password"] {
       width: 100%;
       min-width: 0;
-      padding: 9px;
+      padding: 10px;
       border: 1px solid #aaa;
-      border-radius: 4px;
+      border-radius: 5px;
+      font-size: 16px;
     }
 
     input[type="checkbox"] {
-      margin-right: 5px;
+      margin-right: 6px;
     }
 
     button {
-      padding: 9px 14px;
+      padding: 10px 18px;
       border: none;
-      border-radius: 4px;
+      border-radius: 5px;
       background: #2c3e50;
       color: white;
+      font-size: 16px;
       cursor: pointer;
     }
 
     button:hover {
-      background: #1a252f;
+      background: #405a70;
     }
 
     button:disabled {
-      opacity: 0.6;
+      opacity: .6;
       cursor: not-allowed;
     }
 
@@ -99,16 +92,7 @@
 
     .links {
       text-align: center;
-    }
-
-    @media (max-width: 380px) {
-      table {
-        width: 94vw;
-      }
-
-      td {
-        padding: 7px;
-      }
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -116,19 +100,17 @@
 <body>
   <table>
     <tr>
-      <th colspan="2">Login</th>
+      <th colspan="2">Student Login</th>
     </tr>
 
     <tr>
-      <td><label for="rollNumber">Roll Number</label></td>
+      <td><label for="email">Email</label></td>
       <td>
         <input
-          type="text"
-          id="rollNumber"
-          inputmode="numeric"
+          type="email"
+          id="email"
           autocomplete="username"
-          placeholder="Enter roll number"
-          pattern="[0-9]+"
+          placeholder="Enter registered email"
           required
         >
       </td>
@@ -159,7 +141,6 @@
     <tr>
       <td colspan="2" style="text-align:center">
         <button type="button" id="loginBtn">Login</button>
-        <button type="button" id="resetBtn">Reset</button>
       </td>
     </tr>
 
@@ -178,31 +159,21 @@
   </table>
 
   <script type="module">
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
     import {
       getAuth,
       signInWithEmailAndPassword,
       sendPasswordResetEmail,
-      sendEmailVerification,
-      signOut,
       setPersistence,
       browserLocalPersistence,
-      browserSessionPersistence,
-      reload
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-    import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+      browserSessionPersistence
+    } from
+      "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
+      apiKey: "AIzaSyB_UIqF1nKgHDfOrdmJwJ3f4zUnr11MBCk",
       authDomain: "logpage-b5d48.firebaseapp.com",
       projectId: "logpage-b5d48",
       storageBucket: "logpage-b5d48.firebasestorage.app",
@@ -213,9 +184,8 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
-    const rollInput = document.getElementById("rollNumber");
+    const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     const rememberInput = document.getElementById("remember");
     const message = document.getElementById("message");
@@ -226,46 +196,24 @@
       message.style.color = color;
     }
 
-    async function findEmailByRollNumber(rollNumber) {
-      const usersRef = collection(db, "users");
-      const rollQuery = query(
-        usersRef,
-        where("rollNumber", "==", rollNumber)
-      );
-
-      const result = await getDocs(rollQuery);
-
-      if (result.empty) {
-        return null;
-      }
-
-      if (result.size > 1) {
-        throw new Error(
-          "This roll number is linked to multiple accounts. Contact the administrator."
-        );
-      }
-
-      return result.docs[0].data().email || null;
-    }
-
     loginBtn.addEventListener("click", async () => {
-      const rollNumber = rollInput.value.trim();
+      const email = emailInput.value.trim();
       const password = passwordInput.value;
 
-      if (!/^[0-9]+$/.test(rollNumber)) {
-        showMessage("Please enter a valid numeric roll number.", "red");
-        rollInput.focus();
+      if (!email || !emailInput.checkValidity()) {
+        showMessage("Enter a valid email address.", "red");
+        emailInput.focus();
         return;
       }
 
       if (!password) {
-        showMessage("Please enter your password.", "red");
+        showMessage("Enter your password.", "red");
         passwordInput.focus();
         return;
       }
 
       loginBtn.disabled = true;
-      showMessage("Please wait...");
+      showMessage("Logging in, please wait...");
 
       try {
         await setPersistence(
@@ -275,75 +223,51 @@
             : browserSessionPersistence
         );
 
-        const email = await findEmailByRollNumber(rollNumber);
+        await signInWithEmailAndPassword(auth, email, password);
 
-        if (!email) {
-          showMessage(
-            "No account found for this roll number. Please check it or register first.",
-            "red"
-          );
-          return;
-        }
-
-        const credential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-
-        await reload(credential.user);
-
-        if (!credential.user.emailVerified) {
-          try {
-            await sendEmailVerification(credential.user);
-          } catch (error) {
-            // A verification email may already have been sent.
-          }
-
-          await signOut(auth);
-
-          showMessage(
-            "Your email is not verified. Check your email verification link, then log in again.",
-            "red"
-          );
-          return;
-        }
-
-        showMessage("Login successful!", "green");
-        window.location.href = "welcome.html";
+        // Open the dashboard after Firebase confirms login.
+        window.location.replace("./welcome.html");
 
       } catch (error) {
-        const messages = {
+        console.error("Login error:", error.code, error.message);
+
+        const errors = {
           "auth/invalid-credential":
-            "Incorrect roll number or password.",
+            "Incorrect email or password.",
           "auth/user-not-found":
-            "Incorrect roll number or password.",
+            "Incorrect email or password.",
           "auth/wrong-password":
-            "Incorrect roll number or password.",
+            "Incorrect email or password.",
+          "auth/invalid-email":
+            "Enter a valid email address.",
           "auth/too-many-requests":
-            "Too many attempts. Please try again later.",
+            "Too many attempts. Try again later.",
           "auth/network-request-failed":
-            "Network error. Check your internet.",
-          "permission-denied":
-            "Database permission denied. Check your Firestore security rules."
+            "Network error. Check your internet connection.",
+          "auth/operation-not-allowed":
+            "Email/password login is not enabled in Firebase."
         };
 
         showMessage(
-          messages[error.code] ||
-          error.message ||
-          "Login failed. Please try again.",
+          errors[error.code] || "Login failed: " + error.message,
           "red"
         );
-      } finally {
+
         loginBtn.disabled = false;
       }
     });
 
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      rollInput.value = "";
-      passwordInput.value = "";
-      rememberInput.checked = false;
-      showMessage("");
+    // Press Enter to log in.
+    passwordInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !loginBtn.disabled) {
+        loginBtn.click();
+      }
+    });
+
+    emailInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !loginBtn.disabled) {
+        passwordInput.focus();
+      }
     });
 
     document.getElementById("forgotLink").addEventListener(
@@ -351,41 +275,35 @@
       async (event) => {
         event.preventDefault();
 
-        const rollNumber = rollInput.value.trim();
+        const email = emailInput.value.trim();
 
-        if (!/^[0-9]+$/.test(rollNumber)) {
-          showMessage(
-            "Enter your numeric roll number first.",
-            "red"
-          );
-          rollInput.focus();
+        if (!email || !emailInput.checkValidity()) {
+          showMessage("Enter your registered email first.", "red");
+          emailInput.focus();
           return;
         }
 
         try {
-          showMessage("Finding your registered account...");
-
-          const email = await findEmailByRollNumber(rollNumber);
-
-          if (!email) {
-            showMessage(
-              "No account found for this roll number.",
-              "red"
-            );
-            return;
-          }
+          showMessage("Sending password reset email...");
 
           await sendPasswordResetEmail(auth, email);
 
           showMessage(
-            "If your account exists, a password reset link has been sent to its registered email. Check your inbox and spam folder.",
+            "If an account exists for this email, a reset link will be sent.",
             "green"
           );
-
         } catch (error) {
+          console.error("Password reset error:", error.code);
+
+          const errors = {
+            "auth/invalid-email": "Enter a valid email address.",
+            "auth/too-many-requests": "Too many attempts. Try again later.",
+            "auth/network-request-failed": "Network error. Check your internet."
+          };
+
           showMessage(
-            error.message ||
-            "Could not send the reset email. Please try again later.",
+            errors[error.code] ||
+            "Could not send reset email. Please check and try again.",
             "red"
           );
         }
@@ -394,4 +312,3 @@
   </script>
 </body>
 </html>
-```
